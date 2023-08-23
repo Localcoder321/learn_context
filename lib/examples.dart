@@ -7,7 +7,7 @@ class Examples extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const ExamplePage(),
+        builder: (context) => const ExampleScreen(),
       ),
     );
   }
@@ -15,14 +15,11 @@ class Examples extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: OutlinedButton(
             onPressed: () => nextScreen(context),
-            child: const Text(
-              "Example button",
-            ),
+            child: const Text("Example Screen"),
           ),
         ),
       ),
@@ -30,18 +27,19 @@ class Examples extends StatelessWidget {
   }
 }
 
-class ExamplePage extends StatelessWidget {
-  const ExamplePage({super.key});
+class ExampleScreen extends StatelessWidget {
+  const ExampleScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: SafeArea(
-        child: ColorWidget(
+        child: ColoredWidget(
           initialColor: Colors.teal,
           child: Padding(
             padding: const EdgeInsets.all(40),
-            child: ColorWidget(
+            child: ColoredWidget(
               key: key,
               initialColor: Colors.green,
               child: const Padding(
@@ -56,18 +54,21 @@ class ExamplePage extends StatelessWidget {
   }
 }
 
-class ColorWidget extends StatefulWidget {
+class ColoredWidget extends StatefulWidget {
   final Widget child;
   final Color initialColor;
 
-  const ColorWidget(
-      {super.key, required this.child, required this.initialColor});
+  const ColoredWidget({
+    required this.child,
+    required this.initialColor,
+    super.key,
+  });
 
   @override
-  State<ColorWidget> createState() => _ColorWidgetState();
+  State<ColoredWidget> createState() => _ColoredWidgetState();
 }
 
-class _ColorWidgetState extends State<ColorWidget> {
+class _ColoredWidgetState extends State<ColoredWidget> {
   late Color color;
 
   @override
@@ -95,7 +96,7 @@ class ColorButton extends StatelessWidget {
   const ColorButton({super.key});
 
   void _onPressed(BuildContext context) {
-    final state = context.findAncestorStateOfType<_ColorWidgetState>();
+    final state = context.findRootAncestorStateOfType<_ColoredWidgetState>();
     if (state != null) {
       state.changeColor(Colors.black);
     }
@@ -103,7 +104,7 @@ class ColorButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColorWidget(
+    return ColoredWidget(
       initialColor: Colors.blue,
       child: Center(
         child: OutlinedButton(
@@ -114,3 +115,4 @@ class ColorButton extends StatelessWidget {
     );
   }
 }
+
