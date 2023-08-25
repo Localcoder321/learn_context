@@ -1,49 +1,100 @@
+import 'package:examples_of_context/inherit.dart';
 import 'package:flutter/material.dart';
 
-class Examples extends StatefulWidget {
+class Examples extends StatelessWidget {
   const Examples({super.key});
 
   @override
-  State<Examples> createState() => _ExamplesState();
-}
-
-class _ExamplesState extends State<Examples> {
-  void tap() {
-    text2 = text1;
-    setState(() {});
-  }
-
-  String text1 = "state less";
-  String text2 = "void func";
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Buttons(),
-            const SizedBox(height: 20),
-            Buttons(),
-            const SizedBox(height: 20),
-            const Buttons(),
-          ],
+    return const Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: DataOwnerStateful(),
         ),
       ),
     );
   }
 }
 
-class Buttons extends StatelessWidget {
-  const Buttons({super.key});
+class DataOwnerStateful extends StatefulWidget {
+  const DataOwnerStateful({super.key});
+
+  @override
+  State<DataOwnerStateful> createState() => _DataOwnerStatefulState();
+}
+
+class _DataOwnerStatefulState extends State<DataOwnerStateful> {
+  var _value = 0;
+
+  void _increment() {
+    _value += 1;
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    final stateHomePage = context.findAncestorStateOfType<_ExamplesState>();
-    return ElevatedButton(
-      onPressed: () => stateHomePage?.tap(),
-      child: Text(stateHomePage?.text2 ?? ""),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          onPressed: _increment,
+          child: const Text("Tap"),
+        ),
+        DataProviderInherit(
+          value: _value,
+          child: const DataConsumerStateless(),
+        ),
+      ],
+    );
+  }
+}
+
+class DataConsumerStateless extends StatelessWidget {
+  const DataConsumerStateless({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final value = context
+            .dependOnInheritedWidgetOfExactType<DataProviderInherit>()
+            ?.value ??
+        0;
+
+    return Column(
+      children: [
+        Text(
+          "$value",
+          style: const TextStyle(fontSize: 30),
+        ),
+        const DataConsumerStateful(),
+      ],
+    );
+  }
+}
+
+class DataConsumerStateful extends StatefulWidget {
+  const DataConsumerStateful({super.key});
+
+  @override
+  State<DataConsumerStateful> createState() => _DataConsumerStatefulState();
+}
+
+class _DataConsumerStatefulState extends State<DataConsumerStateful> {
+  @override
+  Widget build(BuildContext context) {
+    final element =
+        context.getElementForInheritedWidgetOfExactType<DataProviderInherit>();
+    if (element != null) {
+      context.dependOnInheritedElement(element);
+    }
+
+    final dataProvider = element?.widget as DataProviderInherit;
+    final value = dataProvider.value;
+
+    return Text(
+      "$value",
+      style: const TextStyle(
+        fontSize: 30,
+      ),
     );
   }
 }
