@@ -1,81 +1,90 @@
+import 'package:examples_of_context/inherit.dart';
 import 'package:flutter/material.dart';
 
-class Examples extends StatefulWidget {
+class Examples extends StatelessWidget {
   const Examples({super.key});
 
   @override
-  State<Examples> createState() => _ExamplesState();
-}
-
-class _ExamplesState extends State<Examples> {
-
-  late MediaQueryData data;
-  final FocusNode f = FocusNode();
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    data = MediaQuery.of(context);
-  }
-
-  @override
-  void dispose() {
-    f.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: (){
-        if(f.hasFocus){
-          FocusScope.of(context).unfocus();
-        } else{
-          FocusScope.of(context).requestFocus(f);
-        }
-      },
-      child: Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextField(
-                    focusNode: f,
-                    controller: TextEditingController()..text = "Padding ${data.padding}",
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                    ),
-                    textAlign: TextAlign.center,
-                    showCursor: false,
-                  ),
-                  TextField(
-                    focusNode: f,
-                    controller: TextEditingController()..text = "View insets ${data.viewInsets}",
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                    ),
-                    textAlign: TextAlign.center,
-                    showCursor: false,
-                  ),
-                  TextField(
-                    focusNode: f,
-                    controller: TextEditingController()..text = "View padding ${data.viewPadding}",
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                    ),
-                    textAlign: TextAlign.center,
-                    showCursor: false,
-                  ),
-                ],
-              ),
-            ),
-          ),
+    return const Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: DataOwnerStateful(),
         ),
       ),
     );
   }
 }
 
+class DataOwnerStateful extends StatefulWidget {
+  const DataOwnerStateful({super.key});
+
+  @override
+  State<DataOwnerStateful> createState() => _DataOwnerStatefulState();
+}
+
+class _DataOwnerStatefulState extends State<DataOwnerStateful> {
+  var _value = 0;
+
+  void _increment() {
+    _value += 1;
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          onPressed: _increment,
+          child: const Text("Tap"),
+        ),
+        Provider(
+          value: _value,
+          child: const DataConsumerStateless(),
+        ),
+      ],
+    );
+  }
+}
+
+class DataConsumerStateless extends StatelessWidget {
+  const DataConsumerStateless({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final value = Provider.of(context, listen: true)?.value ?? 0;
+    return Column(
+      children: [
+        Text(
+          "$value",
+          style: const TextStyle(
+            fontSize: 30,
+          ),
+        ),
+        const DataConsumerStateful(),
+      ],
+    );
+  }
+}
+
+class DataConsumerStateful extends StatefulWidget {
+  const DataConsumerStateful({super.key});
+
+  @override
+  State<DataConsumerStateful> createState() => _DataConsumerStatefulState();
+}
+
+class _DataConsumerStatefulState extends State<DataConsumerStateful> {
+  @override
+  Widget build(BuildContext context) {
+    final value = Provider.of(context)?.value ?? 0;
+    return Text(
+      "$value",
+      style: const TextStyle(
+        fontSize: 30,
+      ),
+    );
+  }
+}
